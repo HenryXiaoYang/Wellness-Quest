@@ -1,11 +1,11 @@
 fastapi~=0.115.6
 pydantic~=2.10.5
 sqlmodel~=0.0.22
-passlib~=1.7.4
+passlib[bcrypt]~=1.7.4
 openai~=1.59.8
 python-dotenv~=1.0.1
 streamlit~=1.41.1
 uvicorn~=0.34.0
-python-jose~=3.3.0
+python-jose[cryptography]~=3.3.0
 python-multipart~=0.0.5
 bcrypt~=4.2.1
