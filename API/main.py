@@ -120,6 +120,8 @@ async def get_quests(
 
     for quest in new_quests:
         session.refresh(quest)
+    for quest in accepted_quests:
+        session.refresh(quest)
         
     return {"quests": accepted_quests+new_quests}
 
