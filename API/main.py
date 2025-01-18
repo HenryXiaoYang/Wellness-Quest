@@ -64,7 +64,7 @@ async def get_quests(
     """Get or generate quests for the user"""
     accepted_quests = await manage_quests(session, current_user.id, quest_type)
 
-    new_count = 3 - len(accepted_quests)
+    new_count = 1 - len(accepted_quests)
     if new_count <= 0:
         return {"message": "Already have maximum accepted quests", "quests": accepted_quests}
 
