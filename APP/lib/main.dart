@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_quest/pages/log_in.dart';
+import 'package:wellness_quest/pages/preference_page.dart';
+import 'package:wellness_quest/pages/quest_selection_page.dart';
 import 'package:wellness_quest/pages/sign_up.dart';
 import 'pages/splash_page.dart';
 
@@ -38,7 +40,9 @@ class MyApp extends StatelessWidget {
       ),
       // home: SplashPage(),
       //   home: SignUpPage(),
-      home: LogInPage(),
+      // home: LogInPage(),
+      // home: PreferencePage(),
+      home:QuestSelectionPage()
     );
   }
 }

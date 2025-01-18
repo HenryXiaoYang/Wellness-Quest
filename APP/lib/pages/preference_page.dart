@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'home_page.dart';
+
 class PreferencePage extends StatefulWidget{
   const PreferencePage({super.key});
   @override
@@ -28,9 +30,17 @@ class IntroPageState extends State<PreferencePage>{
     'How often do you eat a balanced diet?',
     'How many days/week do you exercise?',
     'How satisfied are you with your sleep?',
+    'Directing to homepage...'
   ];
   @override
   Widget build(BuildContext context) {
+    void NavigateToHomePage(context) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+              (route) => false
+      );
+    }
     return Scaffold(
         backgroundColor: Color.fromRGBO(3, 218, 198, 1),
         body: Column(
@@ -62,7 +72,7 @@ class IntroPageState extends State<PreferencePage>{
                           onPressed: () {
                             setState(() {
                               index++;
-                              // if(index==3)NavigateToHomePage(context);
+                              if(index==4)NavigateToHomePage(context);
                             });
                           },
                           style: ElevatedButton.styleFrom(

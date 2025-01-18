@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wellness_quest/pages/preference_page.dart';
 import 'package:wellness_quest/pages/sign_up.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -23,10 +24,10 @@ class _SignUpPageState extends State<LogInPage> {
               (route) => false
       );
     }
-    void NavigateToHomePage(context) {
+    void NavigateToPreferencePage(context) {
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const SignUpPage()),
+          MaterialPageRoute(builder: (context) => const PreferencePage()),
               (route) => false
       );
     }
@@ -53,7 +54,7 @@ class _SignUpPageState extends State<LogInPage> {
           String token = responseData['token']; // Assuming the token is returned in the response
           print('Login successful! Token: $token');
           // Navigate to the next screen or save the token
-          NavigateToHomePage(context); // Implement this function to navigate to the home page
+          NavigateToPreferencePage(context); // Implement this function to navigate to the home page
         } else {
           // Handle error response
           print('Login failed: ${response.body}');
