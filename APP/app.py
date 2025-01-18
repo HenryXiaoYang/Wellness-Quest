@@ -36,6 +36,7 @@ liquid_animation = f"""
     position: absolute;
     z-index: 10000;
     animation: iconFade 4s ease-in-out forwards;
+    opacity: 0;
 }}
 
 .liquid-animation::before,
@@ -46,18 +47,29 @@ liquid_animation = f"""
     width: 200%;
     height: 200%;
     background: #03DAC6;
+    opacity: 0;
+    animation: liquid 4s ease-in-out forwards,
+               fadeIn 0.3s ease-in-out forwards;
 }}
 
 .liquid-animation::before {{
     left: -50%;
     border-radius: 45% 45% 45% 45%;
-    animation: liquid 4s ease-in-out forwards;
 }}
 
 .liquid-animation::after {{
     left: -55%;
     border-radius: 40% 40% 45% 45%;
-    animation: liquid 4s ease-in-out 0.1s forwards;
+    animation-delay: 0.1s;
+}}
+
+@keyframes fadeIn {{
+    0% {{
+        opacity: 0;
+    }}
+    100% {{
+        opacity: 1;
+    }}
 }}
 
 @keyframes liquid {{
