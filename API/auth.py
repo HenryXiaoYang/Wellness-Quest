@@ -130,6 +130,9 @@ class ProfileUpdate(BaseModel):
     full_name: str | None = None
     age: int | None = Field(default=None, ge=13)
     gender: Gender | None = None
+    nutrition_prefrence: list[str] | None = None
+    exercise_prefrence: list[str] | None = None
+    rest_prefrence: list[str] | None = None
 
 @router.post("/profile", response_model=UserResponse)
 async def update_profile(
@@ -137,7 +140,7 @@ async def update_profile(
     current_user: Annotated[User, Depends(get_current_user)],
     session: SessionDep
 ):
-
+    # validate the age
     if profile.age is not (None and profile.age < 0):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -150,6 +153,13 @@ async def update_profile(
         current_user.gender = profile.gender
     if profile.full_name is not None:
         current_user.full_name = profile.full_name
+    
+    if profile.nutrition_prefrence is not None:
+        current_user.nutrition_prefrence = profile.nutrition_prefrence
+    if profile.exercise_prefrence is not None:
+        current_user.exercise_prefrence = profile.exercise_prefrence
+    if profile.rest_prefrence is not None:
+        current_user.rest_prefrence = profile.rest_prefrence
     
     session.add(current_user)
     session.commit()
