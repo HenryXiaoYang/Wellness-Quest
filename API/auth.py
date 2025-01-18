@@ -128,7 +128,7 @@ async def register(user: UserCreate, session: SessionDep):
 
 class ProfileUpdate(BaseModel):
     full_name: str | None = None
-    age: int | None = Field(default=None, ge=13)
+    age: int | None = Field(default=None)
     gender: Gender | None = None
     nutrition_prefrence: list[str] | None = None
     exercise_prefrence: list[str] | None = None
@@ -141,7 +141,7 @@ async def update_profile(
     session: SessionDep
 ):
     # validate the age
-    if profile.age is not (None and profile.age < 0):
+    if profile.age is not None and profile.age < 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid age"
