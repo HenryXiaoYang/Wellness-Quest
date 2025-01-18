@@ -20,7 +20,7 @@ class UserCreate(BaseModel):
     username: str
     password: str
     full_name: str | None = None
-    age: int | None = Field(default=None, ge=13)
+    age: int | None = Field(default=None)
     gender: Gender | None = None
 
 class UserResponse(BaseModel):
@@ -101,10 +101,10 @@ async def register(user: UserCreate, session: SessionDep):
         )
     
     # Validate age
-    if user.age is not None and user.age < 13:
+    if user.age is not None and user.age < 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User must be at least 13 years old"
+            detail="Invalid age"
         )
     
     # Create user with empty preferences
