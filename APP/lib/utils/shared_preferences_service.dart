@@ -36,4 +36,11 @@ class SharedPreferencesService{
     int index=getIndex();
     _preferences.setStringList("note_$index", <String>[title,content]);
   }
+
+  void storeToken(String token){
+    _preferences.setString("token",token);
+  }
+  String getToken(){
+    return _preferences.getString("token") ?? "fail";
+  }
 }

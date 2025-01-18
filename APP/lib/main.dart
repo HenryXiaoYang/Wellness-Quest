@@ -38,11 +38,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      // home: SplashPage(),
-      //   home: SignUpPage(),
+      home: SplashPage(),
+      // home: SignUpPage(),
       // home: LogInPage(),
       // home: PreferencePage(),
-      home:QuestSelectionPage()
+      // home:QuestSelectionPage()
     );
   }
 }

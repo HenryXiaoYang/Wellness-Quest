@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wellness_quest/pages/preference_page.dart';
 
+import 'log_in.dart';
+
 class SplashPage extends StatefulWidget{
   @override
   State createState()=>_State();
@@ -9,10 +11,10 @@ class SplashPage extends StatefulWidget{
 class _State extends State<SplashPage>{
   @override
   Widget build(BuildContext context) {
-    void NavigateToPreferencePage(context) {
+    void NavigateToLogInPage(context) {
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const PreferencePage()),
+          MaterialPageRoute(builder: (context) => const LogInPage()),
               (route) => false
       );
     }
@@ -21,11 +23,12 @@ class _State extends State<SplashPage>{
 
     Future.delayed(
       const Duration(seconds: 3),
-          (){NavigateToPreferencePage(context);},
+          (){NavigateToLogInPage(context);},
       // (){Navigator.pushAndRemoveUntil(context, newRoute, predicate)}
     );
 
-    return Scaffold( //p3
+    return Scaffold( //p
+
       backgroundColor: Color.fromRGBO(3, 218, 198, 1),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
