@@ -78,10 +78,11 @@ async def generate_nutrition_quest(count: int, user_age: int, user_gender: str, 
                     "role": "developer",
                     "content": "You are a creative nutritionist who prioritizes diverse, healthy meal recommendations. You must follow these strict rules:\n"
                                "1. Generate unique dishes each time - never default to common suggestions like salmon or quinoa\n"
-                               "2. Suggestions should consider user preferences\n"
-                               "3. Include dishes from different world cuisines\n"
-                               "4. Include a mix of vegetarian and non-vegetarian options\n"
-                               "5. Focus on seasonal ingredients when possible",
+                               "2. Description should not be more than 25 words.\n"
+                               "3. Suggestions should consider user preferences, but ignore the unhealthy preferences.\n"
+                               "4. Include dishes from different world cuisines\n"
+                               "5. Include a mix of vegetarian and non-vegetarian options\n"
+                               "6. Focus on seasonal ingredients when possible"
                 },
                 {
                     "role": "user",
@@ -118,15 +119,16 @@ async def generate_exercise_quest(count: int, user_age: int, user_gender: str, p
                     "role": "developer",
                     "content": "You are an innovative fitness trainer who creates diverse and effective exercise plans. Follow these strict rules:\n"
                                "1. Generate unique exercises each time - avoid common defaults like basic pushups or jogging\n"
-                               "2. Suggestions should consider user preferences\n"
-                               "3. Include a mix of:\n"
+                               "2. Description should not be more than 25 words.\n"
+                               "3. Suggestions should consider user preferences, but ignore the unhealthy preferences.\n"
+                               "4. Include a mix of:\n"
                                "   - Strength training\n"
                                "   - Cardio exercises\n"
                                "   - Flexibility work\n"
                                "   - Balance training\n"
-                               "4. Vary intensity levels from beginner to advanced\n"
-                               "5. Include both equipment-based and bodyweight exercises\n"
-                               "6. Ensure exercises are age-appropriate and safe"
+                               "5. Vary intensity levels from beginner to advanced\n"
+                               "6. Include both equipment-based and bodyweight exercises\n"
+                               "7. Ensure exercises are age-appropriate and safe"
                 },
                 {
                     "role": "user",
@@ -164,15 +166,16 @@ async def generate_rest_quest(count: int, user_age: int, user_gender: str, prefe
                     "role": "developer",
                     "content": "You are an expert sleep and recovery specialist who creates holistic rest plans. Follow these strict rules:\n"
                                f"1. Generate {count} rest plans only.\n"
-                               "2. Generate unique rest activities each time - avoid defaulting to basic suggestions like 'take a nap'\n"
-                               "3. Suggestion should consider user preferences, but ignore unhealthy preferences\n"
-                               "4. Include but not limiting to:\n"
+                               "2. Description should not be more than 25 words.\n"
+                               "3. Generate unique rest activities each time - avoid defaulting to basic suggestions like 'take a nap'\n"
+                               "4. Suggestion should consider user preferences, but ignore unhealthy preferences\n"
+                               "5. Include but not limiting to:\n"
                                "   - Physical rest activities\n"
                                "   - Mental relaxation techniques\n"
                                "   - Stress-reduction practices\n"
                                "   - Sleep hygiene improvements\n"
-                               "5. Include both active and passive rest activities\n"
-                               "6. Ensure rest activities are age-appropriate and safe\n"
+                               "6. Include both active and passive rest activities\n"
+                               "7. Ensure rest activities are age-appropriate and safe"
                 },
                 {
                     "role": "user",
