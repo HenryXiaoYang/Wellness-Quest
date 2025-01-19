@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../utils/shared_preferences_service.dart';
 import '../widgets/quest_display_card.dart';
+import 'home_page.dart';
 
 class QuestSelectionPage extends StatefulWidget {
   const QuestSelectionPage({super.key});
@@ -13,12 +14,80 @@ class QuestSelectionPage extends StatefulWidget {
 
 class QuestSelectionPageState extends State<QuestSelectionPage> {
   late SharedPreferencesService pref;
-  List<dynamic> quests = []; // Store quests here
+  List<dynamic> quests = [];
+  int questCnt=0;
   bool isLoading = true; // Loading state
+  bool nutritionAcc = false;
+  bool exerciseAcc = false;
+  bool restAcc = false;
+  void NavigateToHomePage(BuildContext context) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage()),
+          (route) => false,
+    );
+  }
+  Color _color(){
+    if(!nutritionAcc){
+      return Color.fromRGBO(131,197,255,1);;
+    } else if (!exerciseAcc){
+      return Color.fromRGBO(255,158,191,1);;
+    } else if (!restAcc){
+      return Color.fromRGBO(218,193,103,1);;
+    } else {
+      return Color.fromRGBO(255,255,255,1);
+    }
+  }
+  String _type() {
+    if(!nutritionAcc){
+      return "nutrition";
+    } else if (!exerciseAcc){
+      return "exercise";
+    } else if (!restAcc){
+      return "rest";
+    } else {
+      return "none";
+    }
+  }
+  void _change(){
+    questCnt++;
+    if(questCnt==3) NavigateToHomePage(context);
+    if(!nutritionAcc){
+      nutritionAcc=true;
+    } else if(!exerciseAcc){
+      exerciseAcc=true;
+    } else if(!restAcc){
+      restAcc=true;
+    }
+  }
+  Future<void> deleteQuest(String questId) async {
+    final String url = 'http://115.159.88.178:1111/quests/$questId/delete';
+    String token = pref.getToken();
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+      );
 
+      if (response.statusCode == 200) {
+        // Successfully deleted the quest
+        print('Quest deleted successfully: ${response.body}');
+      } else {
+        // Handle error response
+        print('Failed to delete quest: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      // Handle any exceptions
+      print('Error occurred: $e');
+    }
+  }
   Future<void> _initializePreferences() async {
     pref = await SharedPreferencesService.getInstance();
-    await fetchQuests("nutrition"); // Fetch quests after initializing preferences
+    await fetchQuests(_type());// Fetch quests after initializing preferences
   }
 
   @override
@@ -26,7 +95,31 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
     super.initState();
     _initializePreferences();
   }
+  Future<void> acceptQuest(String questId) async {
+    final String url = 'http://115.159.88.178:1111/quests/$questId/accept';
+    String token = pref.getToken();
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+      );
 
+      if (response.statusCode == 200) {
+        // Successfully accepted the quest
+        print('Quest accepted successfully: ${response.body}');
+      } else {
+        // Handle error response
+        print('Failed to accept quest: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      // Handle any exceptions
+      print('Error occurred: $e');
+    }
+  }
   Future<void> fetchQuests(String questType) async {
     final String baseUrl = 'http://115.159.88.178:1111';
     final String endpoint = '/quests/$questType/get';
@@ -81,11 +174,11 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
               color: Colors.teal,
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Select the quests for today',
+                  'Select the quests for today---$questCnt/3',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -97,51 +190,51 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
             ),
           ),
           const SizedBox(height: 20.0),
-
-          // Quest Card
-          Expanded(
-            child: ListView.builder(
-              itemCount: quests.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.all(16.0),
+          Container(
+            height: MediaQuery.sizeOf(context).height*0.8,
+                child: Card(
+                  color: _color(),
+                  margin: const EdgeInsets.all(24.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // This will push content to the top and bottom
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          quests[index]['type'], // Adjust based on your data structure
+                          quests[0]['type'], // Adjust based on your data structure
                           style: const TextStyle(
-                            color: Colors.grey,
+                            color: Colors.black,
                             fontSize: 16,
                           ),
                         ),
                         const SizedBox(height: 8.0),
                         Text(
-                          quests[index]['name'], // Adjust based on your data structure
+                          quests[0]['name'], // Adjust based on your data structure
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          quests[index]['description'], // Adjust based on your data structure
+                          quests[0]['description'], // Adjust based on your data structure
                           style: const TextStyle(
                             fontSize: 16,
                           ),
                         ),
+                        const SizedBox(height: 20.0), // Optional spacing
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             // Cross Sign Button
                             ElevatedButton(
-                              onPressed: () {
-                                //delete
+                              onPressed: () async {
+                                await deleteQuest(quests[0]['quest_id'].toString());
+                                await fetchQuests(_type());
+                                setState(() {});
                                 print('Cross Sign Pressed');
                               },
                               style: ElevatedButton.styleFrom(
@@ -149,17 +242,19 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
                                 shape: const CircleBorder(),
                               ),
                               child: const Padding(
-                                  padding: EdgeInsets.all(20.0),
-                                  child: Icon(Icons.close,color: Colors.white)
+                                padding: EdgeInsets.all(20.0),
+                                child: Icon(Icons.close, color: Colors.white),
                               ),
                             ),
                             const SizedBox(width: 20.0),
 
                             // Check Sign Button
                             ElevatedButton(
-                              onPressed: () {
-                                //accept & store
-                                // Handle check action
+                              onPressed: () async {
+                                await acceptQuest(quests[0]['quest_id'].toString());
+                                _change();
+                                await fetchQuests(_type());
+                                setState(() {});
                                 print('Check Sign Pressed');
                               },
                               style: ElevatedButton.styleFrom(
@@ -167,8 +262,8 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
                                 shape: const CircleBorder(),
                               ),
                               child: const Padding(
-                                  padding: EdgeInsets.all(20.0),
-                                  child: Icon(Icons.check,color: Colors.white)
+                                padding: EdgeInsets.all(20.0),
+                                child: Icon(Icons.check, color: Colors.white),
                               ),
                             ),
                           ],
@@ -176,9 +271,7 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
                       ],
                     ),
                   ),
-                );
-              },
-            ),
+                )
           ),
         ],
       ),
