@@ -119,7 +119,11 @@ class _QuestCardState extends State<QuestCard> {
             final rq = QuestRequest();
             await rq.completeQuest(widget.quest_id);
             if (!mounted) return;
-            widget.onComplete();
+            
+            // Play a success sound (optional)
+            // await AudioPlayer().play(AssetSource('sounds/success.mp3'));
+            
+            widget.onComplete(); // This will trigger the celebration in HomePage
           } catch (e) {
             // Silently handle error
           } finally {
