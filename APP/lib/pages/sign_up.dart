@@ -9,7 +9,6 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
 
-
   Future<bool> registerAccount({
     required String username,
     required String password,
