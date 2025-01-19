@@ -150,13 +150,23 @@ uvicorn main:app --reload
 cd APP
 ```
 
-3. Get dependencies:
+3. Set Backend URL:
+
+File at `APP/assets/config.json`:
+
+```json
+{
+  "backend_url": "http://your-api-url:1111"
+}
+```
+
+4. Get dependencies:
 
 ```bash
 flutter pub get
 ```
 
-4. Run the app:
+5. Run the app:
 
 ### For Development
 
