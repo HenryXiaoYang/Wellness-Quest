@@ -36,14 +36,16 @@ class _State extends State<SplashPage>{
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/icon.png', // Replace with your image path
-                width: 120,
-                height: 120,
+                'assets/icon.png',
+                width: 100,
+                height: 100,
               ),
-              // const SizedBox(width: 20), // Add spacing between image and text
-              const Text(
-                'Wellness Quest',
-                style: TextStyle(fontSize: 35,color: Colors.white),
+              const SizedBox(width: 10),
+              const Flexible(
+                child: Text(
+                  'Wellness Quest',
+                  style: TextStyle(fontSize: 35, color: Colors.white),
+                ),
               ),
             ],
           ),

@@ -1,10 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'pages/splash_page.dart';
 
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(const PhoneFrame(child: MyApp()));
+}
+
+class PhoneFrame extends StatelessWidget {
+  final Widget child;
+  const PhoneFrame({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return Center(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(50),
+          ),
+          margin: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
+          width: 390,
+          height: 844,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(40),
+            child: child,
+          ),
+        ),
+      );
+    }
+    return child;
+  }
 }
 
 class MyApp extends StatelessWidget {
