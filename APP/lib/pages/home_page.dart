@@ -132,208 +132,216 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final themeColor = Color.fromRGBO(3, 218, 198, 1);
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  themeColor.withOpacity(0.2),
-                  Colors.white,
-                ],
-              ),
-            ),
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                top: 16.0,
-                left: 16.0,
-                right: 16.0,
-                bottom: 150.0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              themeColor.withOpacity(0.2),
+              Colors.white,
+            ],
+          ),
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            SafeArea(
+              bottom: false,  // Don't add safe area padding at bottom
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 140.0),  // Increased bottom padding
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: themeColor.withOpacity(0.2),
-                              blurRadius: 10,
-                              offset: Offset(0, 4),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: themeColor.withOpacity(0.2),
+                                  blurRadius: 10,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _getGreeting(),
+                                  style: TextStyle(
+                                    fontSize: 24.0, 
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                SizedBox(height: 16.0),
+                                // New Level and Points visualization
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        padding: EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: themeColor.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Text(
+                                                  'Level $level',
+                                                  style: TextStyle(
+                                                    fontSize: 18.0,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: themeColor,
+                                                  ),
+                                                ),
+                                                Icon(
+                                                  Icons.stars,
+                                                  color: themeColor,
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 8),
+                                            LinearProgressIndicator(
+                                              value: (completedQuests % 5) / 5, // 5 tasks per level
+                                              backgroundColor: Colors.white,
+                                              valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                                              minHeight: 8,
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            SizedBox(height: 4),
+                                            Text(
+                                              '$points points',
+                                              style: TextStyle(
+                                                fontSize: 14.0,
+                                                color: Colors.black54,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 24.0),
+                          if (questCnt > 0) ...[
                             Text(
-                              _getGreeting(),
+                              "Today's quests:",
                               style: TextStyle(
-                                fontSize: 24.0, 
+                                fontSize: 24.0,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
                               ),
                             ),
                             SizedBox(height: 16.0),
-                            // New Level and Points visualization
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    padding: EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: themeColor.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Level $level',
-                                              style: TextStyle(
-                                                fontSize: 18.0,
-                                                fontWeight: FontWeight.bold,
-                                                color: themeColor,
-                                              ),
-                                            ),
-                                            Icon(
-                                              Icons.stars,
-                                              color: themeColor,
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 8),
-                                        LinearProgressIndicator(
-                                          value: (completedQuests % 5) / 5, // 5 tasks per level
-                                          backgroundColor: Colors.white,
-                                          valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                                          minHeight: 8,
-                                          borderRadius: BorderRadius.circular(4),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          '$points points',
-                                          style: TextStyle(
-                                            fontSize: 14.0,
-                                            color: Colors.black54,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            ...quests.map((quest) => Padding(
+                              padding: EdgeInsets.only(bottom: 16.0),
+                              child: QuestCard(
+                                topic: quest.type,
+                                title: quest.name,
+                                content: quest.description,
+                                quest_id: quest.quest_id.toString(),
+                                onComplete: () {
+                                  setState(() {
+                                    fetchAcceptedQuests();
+                                    fetchProfiles();
+                                  });
+                                },
+                              ),
+                            )).toList(),
                           ],
-                        ),
+                        ],
                       ),
-                      SizedBox(height: 24.0),
-                      if (questCnt > 0) ...[
-                        Text(
-                          "Today's quests:",
-                          style: TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        SizedBox(height: 16.0),
-                        ...quests.map((quest) => Padding(
-                          padding: EdgeInsets.only(bottom: 16.0),
-                          child: QuestCard(
-                            topic: quest.type,
-                            title: quest.name,
-                            content: quest.description,
-                            quest_id: quest.quest_id.toString(),
-                            onComplete: () {
-                              setState(() {
-                                fetchAcceptedQuests();
-                                fetchProfiles();
-                              });
-                            },
-                          ),
-                        )).toList(),
-                      ],
                     ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 16,
-            child: Column(
-              children: [
-                if (questCnt < 3)
-                  Container(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        NavigateToQuestSelectionPage(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: themeColor,
-                        padding: EdgeInsets.symmetric(vertical: 16.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: SafeArea(
+                child: Padding(  // Changed Container to Padding
+                  padding: EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      if (questCnt < 3)
+                        Container(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              NavigateToQuestSelectionPage(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: themeColor,
+                              padding: EdgeInsets.symmetric(vertical: 16.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 4,
+                            ),
+                            child: Text(
+                              'Select More Quests',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
-                        elevation: 4,
-                      ),
-                      child: Text(
-                        'Select More Quests',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => LeaderboardPage()),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 16.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(color: themeColor, width: 2),
+                            ),
+                            elevation: 2,
+                          ),
+                          child: Text(
+                            'View Leaderboard',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              color: themeColor,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => LeaderboardPage()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: themeColor, width: 2),
-                      ),
-                      elevation: 2,
-                    ),
-                    child: Text(
-                      'View Leaderboard',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                        color: themeColor,
-                      ),
-                    ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
