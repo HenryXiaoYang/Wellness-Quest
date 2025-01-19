@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
-class Request(String user_id){
-  Request._();
-  return null;
+class QuestRequest{
+  final String user_id;
+  QuestRequest({required this.user_id});
+
+
 }
