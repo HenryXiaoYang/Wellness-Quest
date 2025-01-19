@@ -312,3 +312,30 @@ async def get_leaderboard(
         "leaderboard": leaderboard,
         "total_users": len(leaderboard)
     }
+
+@app.get("/users/accepted", tags=["Users"])
+async def get_accepted_quests(
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[Session, Depends(api_database.get_session)]
+):
+    """Get all accepted quests for the user"""
+    accepted_quests = session.exec(
+        select(Quest).where(
+            Quest.user_id == current_user.id,
+            Quest.accepted == True
+        )
+    ).all()
+
+    grouped_quests = {
+        "nutrition": [],
+        "exercise": [],
+        "rest": []
+    }
+    
+    for quest in accepted_quests:
+        grouped_quests[quest.type.value].append(quest)
+    
+    return {
+        "total_accepted": len(accepted_quests),
+        "quests": grouped_quests
+    }
