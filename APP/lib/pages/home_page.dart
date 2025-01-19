@@ -31,9 +31,9 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> fetchAcceptedQuests() async {
     final config = await ConfigService.getInstance();
     final String url = '${config.apiUrl}/users/accepted';
-    String token = pref
-        .getToken(); // Assuming you have a method to get the token
-    try {
+    String token = pref.getToken();
+
+    Future<List<QuestBasic>> doFetch() async {
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -45,30 +45,41 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
-        questCnt = data['total_accepted'];
         if (data['quests'] != null) {
+          Map<String, dynamic> questsMap = data['quests'];
           List<QuestBasic> allQuests = [];
-          data['quests'].forEach((key, value) {
-            if (value is List) {
-              allQuests.addAll(
-                  value.map((questJson) => QuestBasic.fromJson(questJson)));
+          
+          final questTypes = ['nutrition', 'exercise', 'rest'];
+          for (var type in questTypes) {
+            if (questsMap.containsKey(type) && questsMap[type] is List) {
+              List<QuestBasic> typeQuests = (questsMap[type] as List)
+                  .map((questJson) => QuestBasic.fromJson(questJson))
+                  .toList();
+              allQuests.addAll(typeQuests);
             }
-          });
-
-          setState(() {
-            quests = allQuests; // Store the fetched accepted quests
-            isLoading = false; // Update loading state
-          });
-        } else {
-          setState(() {
-            isLoading = false; // Update loading state even if no quests found
-          });
+          }
+          return allQuests;
         }
-      } else {
-        print('Error: ${response.statusCode}');
+      }
+      return [];
+    }
+
+    try {
+      List<QuestBasic> allQuests = await doFetch();
+      
+      if (mounted) {
+        setState(() {
+          quests = allQuests;
+          questCnt = allQuests.length;
+          isLoading = false;
+        });
       }
     } catch (e) {
-      print('Exception: $e');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -79,10 +90,10 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> fetchProfiles() async {
     profile = (await qr.profileQuest())!;
-    fullName = profile!.full_name;
-    completedQuests = profile!.completed_quests;
-    level = profile!.level;
-    points = profile!.points;
+    fullName = profile.full_name;
+    completedQuests = profile.completed_quests;
+    level = profile.level;
+    points = profile.points;
   }
 
   String _getGreeting() {
@@ -126,6 +137,25 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
       MaterialPageRoute(builder: (context) => const QuestSelectionPage()),
           (route) => false,
     );
+  }
+
+  Future<void> refreshAfterQuestCompletion() async {
+    if (!mounted) return;
+    
+    setState(() {
+      isLoading = true;
+    });
+    
+    try {
+      await fetchProfiles();
+      await fetchAcceptedQuests();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -256,11 +286,9 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 title: quest.name,
                                 content: quest.description,
                                 quest_id: quest.quest_id.toString(),
-                                onComplete: () {
-                                  setState(() {
-                                    fetchAcceptedQuests();
-                                    fetchProfiles();
-                                  });
+                                onComplete: () async {
+                                  print('Attempting to complete quest: ${quest.quest_id} of type: ${quest.type}');
+                                  await refreshAfterQuestCompletion();  // Use the new refresh method
                                 },
                               ),
                             )).toList(),

@@ -24,22 +24,7 @@ class QuestCard extends StatefulWidget {
 }
 
 class _QuestCardState extends State<QuestCard> {
-  late String title;
-  late String content;
-  late String topic;
-  late String quest_id;
-  late VoidCallback onComplete;
   bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    title = widget.title;
-    content = widget.content;
-    topic = widget.topic;
-    quest_id = widget.quest_id;
-    onComplete = widget.onComplete;
-  }
 
   Color _color(String type){
     if(type=='nutrition'){
@@ -70,7 +55,7 @@ class _QuestCardState extends State<QuestCard> {
       child: Container(
         padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: _color(topic).withOpacity(0.7),
+          color: _color(widget.topic).withOpacity(0.7),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -83,7 +68,7 @@ class _QuestCardState extends State<QuestCard> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                capitalizeWords(topic),
+                capitalizeWords(widget.topic),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -94,7 +79,7 @@ class _QuestCardState extends State<QuestCard> {
             ),
             SizedBox(height: 16),
             Text(
-              title,
+              widget.title,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -105,7 +90,7 @@ class _QuestCardState extends State<QuestCard> {
             ),
             SizedBox(height: 12),
             Text(
-              content,
+              widget.content,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,
@@ -127,15 +112,25 @@ class _QuestCardState extends State<QuestCard> {
       height: 48,
       child: ElevatedButton(
         onPressed: isLoading ? null : () async {
+          if (!mounted) return;
           setState(() => isLoading = true);
-          final rq = QuestRequest();
-          await rq.completeQuest(quest_id);
-          onComplete();
-          setState(() => isLoading = false);
+          
+          try {
+            final rq = QuestRequest();
+            await rq.completeQuest(widget.quest_id);
+            if (!mounted) return;
+            widget.onComplete();
+          } catch (e) {
+            // Silently handle error
+          } finally {
+            if (mounted) {
+              setState(() => isLoading = false);
+            }
+          }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: HSLColor.fromColor(_color(topic))
-              .withLightness(HSLColor.fromColor(_color(topic)).lightness * 0.75)
+          backgroundColor: HSLColor.fromColor(_color(widget.topic))
+              .withLightness(HSLColor.fromColor(_color(widget.topic)).lightness * 0.75)
               .withAlpha(0.9)
               .toColor(),
           foregroundColor: Colors.white.withOpacity(0.95),
