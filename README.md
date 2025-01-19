@@ -156,7 +156,7 @@ File at `APP/assets/config.json`:
 
 ```json
 {
-  "backend_url": "http://your-api-url:1111"
+  "backend_url": "http://your-api-url"
 }
 ```
 
