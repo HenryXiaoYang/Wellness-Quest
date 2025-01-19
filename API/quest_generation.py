@@ -77,7 +77,6 @@ async def generate_nutrition_quest(count: int, user_age: int, user_gender: str, 
                                "2. Only 30% of suggestions should consider user preferences\n"
                                "3. 70% of suggestions should be completely independent of user preferences\n"
                                "4. Include dishes from different world cuisines\n"
-                               "5. Vary between simple and complex recipes\n"
                                "6. Include a mix of vegetarian and non-vegetarian options\n"
                                "7. Focus on seasonal ingredients when possible",
                 },
