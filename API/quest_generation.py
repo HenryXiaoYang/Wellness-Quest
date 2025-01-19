@@ -64,7 +64,7 @@ async def generate_nutrition_quest(count: int, user_age: int, user_gender: str, 
             messages=[
                 {
                     "role": "system",
-                    "content": f"You are a nutritionist creating {count} nutrition dishes for a {user_age} year old {user_gender} client with the following preferences: {pref_str}."
+                    "content": f"You are a nutritionist creating {count} nutrition dishes for a {user_age} year old {user_gender} client with the following preferences: {pref_str}. Remember: You do not need to always follow the preferences exactly, but they should only be taken into account."
                 }
             ],
             response_format=NutritionQuests
@@ -91,7 +91,7 @@ async def generate_exercise_quest(count: int, user_age: int, user_gender: str, p
             messages=[
                 {
                     "role": "system",
-                    "content": f"You are a personal trainer creating {count} exercise for a {user_age} year old {user_gender} client with the following preferences: {pref_str}."
+                    "content": f"You are a personal trainer creating {count} exercise for a {user_age} year old {user_gender} client with the following preferences: {pref_str}. Remember: You do not need to always follow the preferences exactly, but they should only be taken into account."
                 }
             ],
             response_format=ExerciseQuests
@@ -118,7 +118,7 @@ async def generate_rest_quest(count: int, user_age: int, user_gender: str, prefe
             messages=[
                 {
                     "role": "system",
-                    "content": f"You are a rest & sleep expert creating {count} daily rest Quests for a {user_age} year old {user_gender} client with the following preferences: {pref_str}."
+                    "content": f"You are a rest & sleep expert creating {count} daily rest Quests for a {user_age} year old {user_gender} client with the following preferences: {pref_str}. Remember: You do not need to always follow the preferences exactly, but they should only be taken into account."
                 }
             ],
             response_format=RestQuests
