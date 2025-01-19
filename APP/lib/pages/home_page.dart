@@ -216,10 +216,10 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               )
             else
               SafeArea(
-                bottom: false,  // Don't add safe area padding at bottom
+                bottom: false,
                 child: SingleChildScrollView(
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 140.0),  // Increased bottom padding
+                    padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 120.0),  // Increased horizontal and top padding
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -227,15 +227,15 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              padding: EdgeInsets.all(16),
+                              padding: EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(15),
+                                borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
                                     color: themeColor.withOpacity(0.2),
-                                    blurRadius: 10,
-                                    offset: Offset(0, 4),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 3),
                                   ),
                                 ],
                               ),
@@ -245,12 +245,12 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                   Text(
                                     _getGreeting(),
                                     style: TextStyle(
-                                      fontSize: 24.0, 
+                                      fontSize: 20.0,  // Reduced font size
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black87,
                                     ),
                                   ),
-                                  SizedBox(height: 16.0),
+                                  SizedBox(height: 12.0),  // Reduced spacing
                                   // New Level and Points visualization
                                   Row(
                                     children: [
@@ -342,9 +342,10 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
               right: 0,
               bottom: 0,
               child: SafeArea(
-                child: Padding(  // Changed Container to Padding
-                  padding: EdgeInsets.all(8.0),
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       if (questCnt < 3)
                         Container(
@@ -371,7 +372,7 @@ class HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             ),
                           ),
                         ),
-                      SizedBox(height: 12),
+                      SizedBox(height: 8),
                       Container(
                         width: double.infinity,
                         child: ElevatedButton(

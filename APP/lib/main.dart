@@ -15,21 +15,37 @@ class PhoneFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (kIsWeb) {
-      return Center(
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(50),
-          ),
-          margin: const EdgeInsets.all(20),
-          padding: const EdgeInsets.all(16),
-          width: 390,
-          height: 844,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(40),
-            child: child,
-          ),
-        ),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          const targetAspectRatio = 1.8;
+          
+          // Calculate dimensions to fit the screen while maintaining aspect ratio
+          double width = constraints.maxWidth * 0.95;
+          double height = width * targetAspectRatio;
+          
+          // If height exceeds available height, recalculate based on height
+          if (height > constraints.maxHeight * 0.95) {
+            height = constraints.maxHeight * 0.95;
+            width = height / targetAspectRatio;
+          }
+          
+          return Center(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(50),
+              ),
+              margin: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
+              width: width,
+              height: height,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(40),
+                child: child,
+              ),
+            ),
+          );
+        },
       );
     }
     return child;
