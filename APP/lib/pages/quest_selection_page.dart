@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../utils/shared_preferences_service.dart';
 import '../widgets/quest_display_card.dart';
 import 'home_page.dart';
+import '../utils/config_service.dart';
 
 class QuestSelectionPage extends StatefulWidget {
   const QuestSelectionPage({super.key});
@@ -20,6 +21,7 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
   bool nutritionAcc = false;
   bool exerciseAcc = false;
   bool restAcc = false;
+  bool isButtonLoading = false; // Add this state variable at the class level
   void NavigateToHomePage(BuildContext context) {
     Navigator.pushAndRemoveUntil(
       context,
@@ -61,7 +63,8 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
     }
   }
   Future<void> deleteQuest(String questId) async {
-    final String url = 'http://115.159.88.178:1111/quests/$questId/delete';
+    final config = await ConfigService.getInstance();
+    final String url = '${config.apiUrl}/quests/$questId/delete';
     String token = pref.getToken();
     try {
       final response = await http.get(
@@ -96,7 +99,8 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
     _initializePreferences();
   }
   Future<void> acceptQuest(String questId) async {
-    final String url = 'http://115.159.88.178:1111/quests/$questId/accept';
+    final config = await ConfigService.getInstance();
+    final String url = '${config.apiUrl}/quests/$questId/accept';
     String token = pref.getToken();
     try {
       final response = await http.get(
@@ -121,10 +125,10 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
     }
   }
   Future<void> fetchQuests(String questType) async {
-    final String baseUrl = 'http://115.159.88.178:1111';
-    final String endpoint = '/quests/$questType/get';
+    final config = await ConfigService.getInstance();
+    final String url = '${config.apiUrl}/quests/$questType/get';
     String token = pref.getToken();
-    final Uri url = Uri.parse('$baseUrl$endpoint');
+    final Uri uri = Uri.parse(url);
     final Map<String, String> headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -132,7 +136,7 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
     };
 
     try {
-      final response = await http.get(url, headers: headers);
+      final response = await http.get(uri, headers: headers);
 
       if (response.statusCode == 200) {
         // Parse the JSON response
@@ -161,120 +165,260 @@ class QuestSelectionPageState extends State<QuestSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeColor = Color.fromRGBO(3, 218, 198, 1);
     return Scaffold(
-      body: isLoading
-          ? Center(child: CircularProgressIndicator()) // Show loading indicator
-          : Column(
-        children: [
-          // Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16.0),
-            decoration: const BoxDecoration(
-              color: Colors.teal,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Select the quests for today---$questCnt/3',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8.0),
-              ],
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              themeColor.withOpacity(0.2),
+              Colors.white,
+            ],
           ),
-          const SizedBox(height: 20.0),
-          Container(
-            height: MediaQuery.sizeOf(context).height*0.8,
-                child: Card(
-                  color: _color(),
-                  margin: const EdgeInsets.all(24.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // This will push content to the top and bottom
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          quests[0]['type'], // Adjust based on your data structure
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 8.0),
-                        Text(
-                          quests[0]['name'], // Adjust based on your data structure
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          quests[0]['description'], // Adjust based on your data structure
-                          style: const TextStyle(
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 20.0), // Optional spacing
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Cross Sign Button
-                            ElevatedButton(
-                              onPressed: () async {
-                                await deleteQuest(quests[0]['quest_id'].toString());
-                                await fetchQuests(_type());
-                                setState(() {});
-                                print('Cross Sign Pressed');
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                                shape: const CircleBorder(),
-                              ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(20.0),
-                                child: Icon(Icons.close, color: Colors.white),
-                              ),
+        ),
+        child: isLoading
+            ? Center(child: CircularProgressIndicator(color: themeColor))
+            : SafeArea(
+                child: Column(
+                  children: [
+                    // Header
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Select Your Quests',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
-                            const SizedBox(width: 20.0),
-
-                            // Check Sign Button
-                            ElevatedButton(
-                              onPressed: () async {
-                                await acceptQuest(quests[0]['quest_id'].toString());
-                                _change();
-                                await fetchQuests(_type());
-                                setState(() {});
-                                print('Check Sign Pressed');
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                shape: const CircleBorder(),
-                              ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(20.0),
-                                child: Icon(Icons.check, color: Colors.white),
-                              ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            '$questCnt of 3 quests selected',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.black54,
                             ),
-                          ],
-                        ),
-                      ],
+                          ),
+                          SizedBox(height: 16),
+                          LinearProgressIndicator(
+                            value: questCnt / 3,
+                            backgroundColor: Colors.grey.withOpacity(0.2),
+                            valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                            minHeight: 6,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                )
+                    
+                    // Quest Card
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 24.0),
+                        child: AnimatedSwitcher(
+                          duration: Duration(milliseconds: 300),
+                          transitionBuilder: (Widget child, Animation<double> animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            );
+                          },
+                          child: Container(
+                            key: ValueKey<String>(quests[0]['quest_id'].toString()),
+                            width: double.infinity,
+                            height: double.infinity,
+                            child: Card(
+                              elevation: 8,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24.0),
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(24.0),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: _getQuestTypeColors(),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 6,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withOpacity(0.2),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Text(
+                                                capitalizeWords(quests[0]['type']),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(height: 24),
+                                            Text(
+                                              capitalizeWords(quests[0]['name']),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 28,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            SizedBox(height: 16),
+                                            Expanded(
+                                              child: SingleChildScrollView(
+                                                child: Text(
+                                                  quests[0]['description'],
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    color: Colors.white.withOpacity(0.9),
+                                                    height: 1.5,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(height: 32),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          _buildActionButton(
+                                            icon: Icons.close,
+                                            color: Colors.white,
+                                            backgroundColor: Colors.red.withOpacity(0.8),
+                                            onPressed: isButtonLoading ? null : () async {
+                                              setState(() => isButtonLoading = true);
+                                              await deleteQuest(quests[0]['quest_id'].toString());
+                                              await fetchQuests(_type());
+                                              setState(() => isButtonLoading = false);
+                                            },
+                                          ),
+                                          SizedBox(width: 32),
+                                          _buildActionButton(
+                                            icon: Icons.check,
+                                            color: Colors.white,
+                                            backgroundColor: Colors.green.withOpacity(0.8),
+                                            onPressed: isButtonLoading ? null : () async {
+                                              setState(() => isButtonLoading = true);
+                                              await acceptQuest(quests[0]['quest_id'].toString());
+                                              _change();
+                                              await fetchQuests(_type());
+                                              setState(() => isButtonLoading = false);
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                  ],
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required Color backgroundColor,
+    required VoidCallback? onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: backgroundColor.withOpacity(0.3),
+            blurRadius: 8,
+            offset: Offset(0, 4),
           ),
         ],
       ),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor,
+          padding: EdgeInsets.all(24),
+          shape: CircleBorder(),
+          elevation: 0,
+        ),
+        child: isButtonLoading
+            ? SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: color,
+                  strokeWidth: 2,
+                ),
+              )
+            : Icon(icon, color: color, size: 32),
+      ),
     );
+  }
+
+  List<Color> _getQuestTypeColors() {
+    if (!nutritionAcc) {
+      return [
+        Color(0xFF64B5F6),
+        Color(0xFF1E88E5),
+      ];
+    } else if (!exerciseAcc) {
+      return [
+        Color(0xFFFF80AB),
+        Color(0xFFD81B60),
+      ];
+    } else if (!restAcc) {
+      return [
+        Color(0xFFFFD54F),
+        Color(0xFFFFA000),
+      ];
+    } else {
+      return [
+        Colors.grey.shade300,
+        Colors.grey.shade400,
+      ];
+    }
+  }
+
+  String capitalizeWords(String text) {
+    if (text.isEmpty) return text;
+    return text.split(' ').map((word) => 
+      word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : ''
+    ).join(' ');
   }
 }

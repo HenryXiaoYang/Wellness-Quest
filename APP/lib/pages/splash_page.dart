@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wellness_quest/pages/preference_page.dart';
 
 import 'log_in.dart';
 

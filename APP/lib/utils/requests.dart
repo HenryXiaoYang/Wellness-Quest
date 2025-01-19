@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'shared_preferences_service.dart';
 import 'package:wellness_quest/utils/structures.dart';
+import 'config_service.dart';
 
 class QuestRequest {
   late SharedPreferencesService pref;
@@ -10,11 +11,11 @@ class QuestRequest {
     pref = await SharedPreferencesService.getInstance();
   }
 
-  // Change return type to Future<ProfileBasic>
   Future<ProfileBasic?> profileQuest() async {
-    await _initializePreferences(); // Ensure preferences are initialized
-    final String url = 'http://115.159.88.178:1111/users/profile';
-    String token = pref.getToken(); // Assuming pref is an instance of your preferences service
+    await _initializePreferences();
+    final config = await ConfigService.getInstance();
+    final String url = '${config.apiUrl}/users/profile';
+    String token = pref.getToken();
 
     try {
       final response = await http.get(
@@ -28,26 +29,24 @@ class QuestRequest {
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
-        print(data); // Print the profile data for debugging
-
-        // Directly create a ProfileBasic instance from the JSON response
+        print(data);
         ProfileBasic profile = ProfileBasic.fromJson(data);
-
         print('Success: Profile fetched');
-        return profile; // Return the ProfileBasic instance
+        return profile;
       } else {
         print('Error: ${response.statusCode}');
-        return null; // Return null on error
+        return null;
       }
     } catch (e) {
       print('Exception: $e');
-      return null; // Return null on exception
+      return null;
     }
   }
 
   Future<void> completeQuest(String questId) async {
     await _initializePreferences();
-    final String url = 'http://115.159.88.178:1111/quests/$questId/complete';
+    final config = await ConfigService.getInstance();
+    final String url = '${config.apiUrl}/quests/$questId/complete';
     String token = pref.getToken();
     try {
       final response = await http.get(
@@ -62,14 +61,11 @@ class QuestRequest {
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
         print(data);
-
         print('Quest completed successfully: ${response.body}');
       } else {
-        // Handle error response
         print('Failed to complete quest: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
-      // Handle any exceptions
       print('Error occurred: $e');
     }
   }

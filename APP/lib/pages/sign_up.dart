@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../utils/config_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../pages/preference_page.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -16,7 +19,8 @@ class _SignUpPageState extends State<SignUpPage> {
     required int age,
     required String gender,
   }) async {
-    final String apiUrl = 'http://115.159.88.178:1111/auth/register';
+    final config = await ConfigService.getInstance();
+    final String apiUrl = '${config.apiUrl}/auth/register';
 
     // Prepare the request body
     final Map<String, dynamic> requestBody = {
@@ -53,7 +57,37 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
+  Future<Map<String, dynamic>?> loginUser(String username, String password) async {
+    final config = await ConfigService.getInstance();
+    final String apiUrl = '${config.apiUrl}/auth/login';
 
+    // Prepare the body in x-www-form-urlencoded format
+    final Map<String, String> data = {
+      'username': username,
+      'password': password,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: data, // Use the Map directly as the body
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        // Update to match the correct token key from login response
+        responseData['token'] = responseData['access_token'];
+        return responseData;
+      }
+      return null;
+    } catch (e) {
+      print('Login Exception: $e');
+      return null;
+    }
+  }
 
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -76,10 +110,28 @@ class _SignUpPageState extends State<SignUpPage> {
     );
 
     if (success) {
-      // Show success message or navigate to another page
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration successful!')),
-      );
+      // Attempt to login immediately after successful registration
+      final loginResponse = await loginUser(username, password);
+      if (loginResponse != null) {
+        // Store the token using the correct key
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', loginResponse['access_token']);
+        
+        // Navigate to preference page instead of home
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration successful!')),
+        );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const PreferencePage()),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration successful but auto-login failed. Please login manually.')),
+        );
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
     } else {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../utils/shared_preferences_service.dart';
 import 'home_page.dart';
+import '../utils/config_service.dart';
 
 class PreferencePage extends StatefulWidget {
   const PreferencePage({super.key});
@@ -17,12 +18,68 @@ class IntroPageState extends State<PreferencePage> {
   @override
   void initState() {
     super.initState();
-    _initializePreferences();
-    // Load preferences here if needed
+    _initializeAndLoadPreferences();
+  }
+
+  Future<void> _initializeAndLoadPreferences() async {
+    await _initializePreferences();
+    await _loadExistingPreferences();
   }
 
   Future<void> _initializePreferences() async {
     pref = await SharedPreferencesService.getInstance();
+  }
+
+  bool _isLoading = true;  // Add this flag to track loading state
+
+  Future<void> _loadExistingPreferences() async {
+    final config = await ConfigService.getInstance();
+    final String baseUrl = '${config.apiUrl}/auth';
+    String token = pref.getToken();
+    
+    if (token.isEmpty) {
+      setState(() {
+        _isLoading = false;  // No token, stop loading
+      });
+      return;
+    }
+
+    try {
+      final profileResponse = await http.get(
+        Uri.parse('${config.apiUrl}/users/profile'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+      );
+
+      if (profileResponse.statusCode == 200) {
+        final profile = jsonDecode(profileResponse.body);
+        setState(() {
+          // Convert arrays back to comma-separated strings
+          _controllers[0].text = (profile['nutrition_prefrence'] as List?)?.join(',') ?? '';
+          _controllers[1].text = (profile['exercise_prefrence'] as List?)?.join(',') ?? '';
+          _controllers[2].text = (profile['rest_prefrence'] as List?)?.join(',') ?? '';
+          
+          // Update responses as well
+          _responses[0] = _controllers[0].text;
+          _responses[1] = _controllers[1].text;
+          _responses[2] = _controllers[2].text;
+          
+          _isLoading = false;  // Mark loading as complete
+        });
+      } else {
+        print('Failed to load preferences: ${profileResponse.statusCode}');
+        setState(() {
+          _isLoading = false;  // Stop loading on error
+        });
+      }
+    } catch (e) {
+      print('Error loading preferences: $e');
+      setState(() {
+        _isLoading = false;  // Stop loading on error
+      });
+    }
   }
 
   int index = 0;
@@ -37,7 +94,7 @@ class IntroPageState extends State<PreferencePage> {
     'Welcome!',
     'What do you eat in your daily diet?',
     'What sports do you play?',
-    'When do you sleep at?',
+    'What you do in your free time?',
     'Directing to homepage...'
   ];
 
@@ -54,29 +111,41 @@ class IntroPageState extends State<PreferencePage> {
   }
 
   Future<void> updateUserProfile() async {
-    final url = 'http://115.159.88.178:1111/auth/profile'; // API URL
-    String token=pref.getToken();
-    print(token);
-    final response = await http.post(
-      Uri.parse(url),
+    final config = await ConfigService.getInstance();
+    final String baseUrl = '${config.apiUrl}/auth';
+    String token = pref.getToken();
+    
+    // First, get the current user profile
+    final profileResponse = await http.get(
+      Uri.parse('${config.apiUrl}/users/profile'),
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+    );
 
+    if (profileResponse.statusCode != 200) {
+      print('Failed to get profile: ${profileResponse.body}');
+      return;
+    }
+
+    // Parse the existing profile data
+    final existingProfile = jsonDecode(profileResponse.body);
+    print('Existing profile: $existingProfile');
+
+    // Update profile with new preferences while keeping existing data
+    final response = await http.post(
+      Uri.parse('$baseUrl/profile'),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': 'Bearer $token'
       },
       body: jsonEncode({
-        'id': 1, // Replace with actual user ID if necessary
-        'username': 'string', // Replace with actual username
-        'full_name': 'string', // Replace with actual full name
-        'age': 20, // Replace with actual age
-        'gender': 'male', // Replace with actual gender
-        'nutrition_prefrence': _responses[0].split(','), // Split by comma
-        'exercise_prefrence': _responses[1].split(','), // Split by comma
-        'rest_prefrence': _responses[2].split(','), // Split by comma
-        'completed_quests': 0,
-        'level': 0,
-        'points': 0,
+        ...existingProfile, // Keep all existing profile data
+        'nutrition_prefrence': _responses[0].split(','),
+        'exercise_prefrence': _responses[1].split(','),
+        'rest_prefrence': _responses[2].split(','),
       }),
     );
 
@@ -98,82 +167,187 @@ class IntroPageState extends State<PreferencePage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeColor = Color.fromRGBO(3, 218, 198, 1);
     return Scaffold(
-      backgroundColor: Color.fromRGBO(3, 218, 198, 1),
-      body: Column(
+      body: Stack(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height * 0.9,
-            margin: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 30.0),
-            child: Stack(
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _title[index],
-                      style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    if (index > 0 && index <= 3) ...[
-                      SizedBox(height: 20), // Add some space before the TextField
-                      TextField(
-                        controller: _controllers[index - 1],
-                        onChanged: (value) {
-                          _responses[index - 1] = value; // Store response for questions 2, 3, and 4
-                        },
-                        onEditingComplete: () {
-                          clearText(index - 1); // Clear the text field when editing is complete
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Type your answer here...',
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ],
-                    if (index == 0)
-                      Text(
-                        'Before we start, we would like to learn from you.',
-                        style: const TextStyle(fontSize: 18, color: Colors.white),
-                      ),
-                  ],
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height / 7,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          if (index != 0) {
-                            clearText(index - 1); // Clear response when moving to the next question
-                          }
-                          index++;
-                          if (index == 4) {
-                            updateUserProfile().then((_) {
-                              NavigateToHomePage(context);
-                            });
-                          }
-                          // Prevents incrementing beyond the limit
-                          if (index > 4) {
-                            index = 4; // Keep it at the last index
-                          }
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                      ),
-                      child: const Text(
-                        'Next',
-                        style: TextStyle(fontSize: 30, color: Color.fromRGBO(3, 218, 198, 1)),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  themeColor.withOpacity(0.2),
+                  Colors.white,
+                ],
+              ),
+            ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AnimatedSwitcher(
+                            duration: Duration(milliseconds: 300),
+                            child: Text(
+                              _title[index],
+                              key: ValueKey<int>(index),
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                                height: 1.2,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          if (index == 0) ...[
+                            Text(
+                              'Before we start, we would like to learn from you.',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.black54,
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                          if (index > 0 && index <= 3) ...[
+                            SizedBox(height: 32),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: themeColor.withOpacity(0.1),
+                                    blurRadius: 20,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: TextField(
+                                controller: _controllers[index - 1],
+                                onChanged: (value) {
+                                  _responses[index - 1] = value;
+                                },
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Type your answer here...',
+                                  hintStyle: TextStyle(color: Colors.black38),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: EdgeInsets.all(20),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: themeColor.withOpacity(0.2),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide(
+                                      color: themeColor,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ),
-                ),
-              ],
+                  Container(
+                    padding: EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        if (index == 0) ...[
+                          Container(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                NavigateToHomePage(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  side: BorderSide(
+                                    color: themeColor,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                'Skip for now',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: themeColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                        ],
+                        Container(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                if (index != 0) {
+                                  clearText(index - 1);
+                                }
+                                index++;
+                                if (index == 4) {
+                                  updateUserProfile().then((_) {
+                                    NavigateToHomePage(context);
+                                  });
+                                }
+                                if (index > 4) {
+                                  index = 4;
+                                }
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: themeColor,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Text(
+                              index < 3 ? 'Next' : 'Finish',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
